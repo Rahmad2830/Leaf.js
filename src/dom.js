@@ -4,6 +4,22 @@ import { LocalScope } from "./scope.js"
 
 const ListenerCache = new WeakMap()
 
+function clearListener(el, event) {
+  let eventMap = ListenerCache.get(el)
+  if (!eventMap) return
+  
+  const oldListener = eventMap[event]
+  if (!oldListener) return
+  
+  el.removeEventListener(event, oldListener)
+  delete eventMap[event]
+  
+  if(Object.keys(eventMap).length === 0) {
+    ListenerCache.delete(el)
+  }
+}
+
+//directive inside loop
 function mountLoop(el, scope) {
   const disposers = []
   
@@ -20,6 +36,7 @@ function mountLoop(el, scope) {
   return () => disposers.forEach(fn => fn())
 }
 
+//init directive
 export function mount() {
   document.querySelectorAll("[data-scope]").forEach(el => {
     const state = LocalScope[el.dataset.scope]
@@ -35,21 +52,21 @@ export function mount() {
     el.querySelectorAll("[data-on]").forEach(onEl => {
       const onVal = onEl.dataset.on.split(":")
       const event = onVal[0]
-      const path = getNested(state, onVal[1])
       
       const listener = () => {
+        const path = getNested(state, onVal[1])
         if(typeof path === "function") {
           path()
         }
       }
-      //search listener in cache
+      
       let eventMap = ListenerCache.get(onEl)
       if (!eventMap) {
         eventMap = {}
         ListenerCache.set(onEl, eventMap)
       }
-      const oldListener = eventMap[event]
-      if (oldListener) onEl.removeEventListener(event, oldListener)
+      
+      clearListener(onEl, event)
       
       onEl.addEventListener(event, listener)
       eventMap[event] = listener
@@ -113,10 +130,23 @@ export function mount() {
           modelEl.value = v ?? ""
         }
       })
+      
+      let eventMap = ListenerCache.get(modelEl)
+      if(!eventMap) {
+        eventMap = {}
+        ListenerCache.set(modelEl, eventMap)
+      }
+      
+      const listener = (e) => {
+        if(typeof write === "function") {
+          write(e.target.value)
+        }
+      }
+      
+      clearListener(modelEl, "input")
     
-      modelEl.addEventListener("input", e => {
-        write(e.target.value)
-      })
+      modelEl.addEventListener("input", listener)
+      eventMap["input"] = listener
     })
   })
 }

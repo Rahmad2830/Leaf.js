@@ -18,7 +18,6 @@ export function effect(fn) {
   }
   
   effectFn.deps = new Set()
-  
   effectFn()
   
   return () => cleanup(effectFn)
@@ -38,7 +37,7 @@ export function signal(initial) {
   const write = (v) => {
     value = v
     const effect = new Set(subs)
-    effect.forEach(fn => fn(v))
+    effect.forEach(fn => fn())
   }
   return [read, write]
 }
