@@ -19,19 +19,81 @@ function clearListener(el, event) {
   }
 }
 
+function resolveParams(param, scope) {
+  function resolve(p) {
+    if(p === "true") return true
+    if(p === "false") return false
+    if(p === "null") return null
+    if(p === "undefined") return undefined
+    
+    if(!isNaN(p) && p.trim() !== "") {
+      return Number(p)
+    }
+    
+    return p
+  }
+  const pm = param.map(p => {
+    const val = getNested(scope, p)
+    if(val !== undefined) {
+      return typeof val === "function" ? val() : val
+    }
+    //fallback raw string
+    return resolve(p)
+  })
+  return pm
+}
+
+function eventModifier(mod = [], e) {
+  if(mod.includes("prevent")) {
+    e.preventDefault()
+  }
+  if(mod.includes("stop")) {
+    e.stopPropagation()
+  }
+}
+
 //directive inside loop
 function mountLoop(el, scope) {
   const disposers = []
   
   el.querySelectorAll("[data-text]").forEach(textEl => {
     const path = textEl.dataset.text
-    const val = getNested(scope, path)
     
     const textDispose = effect(() => {
+      const val = getNested(scope, path)
       textEl.textContent = typeof val === "function" ? val() : val
     })
     disposers.push(textDispose)
   })
+  
+  el.querySelectorAll("[data-on]").forEach(onEl => {
+      const [eventWithMod, handlerPath] = onEl.dataset.on.split(":")
+      const parts = eventWithMod.split(".")
+      const event = parts[0]
+      const modifier = parts.slice(1)
+      
+      const params = onEl.dataset.param ? onEl.dataset.param.split(",").map(p => p.trim()) : []
+      
+      const listener = (e) => {
+        const path = getNested(scope, handlerPath)
+        if(typeof path === "function") {
+          eventModifier(modifier, e)
+          const param = resolveParams(params, scope)
+          path(...param, e)
+        }
+      }
+      
+      let eventMap = ListenerCache.get(onEl)
+      if (!eventMap) {
+        eventMap = {}
+        ListenerCache.set(onEl, eventMap)
+      }
+      
+      clearListener(onEl, event)
+      
+      onEl.addEventListener(event, listener)
+      eventMap[event] = listener
+    })
   
   return () => disposers.forEach(fn => fn())
 }
@@ -50,13 +112,21 @@ export function mount() {
     })
     
     el.querySelectorAll("[data-on]").forEach(onEl => {
-      const onVal = onEl.dataset.on.split(":")
-      const event = onVal[0]
+      const [eventWithMod, handlerPath] = onEl.dataset.on.split(":")
+      const parts = eventWithMod.split(".")
+      const event = parts[0]
+      const modifier = parts.slice(1)
       
-      const listener = () => {
-        const path = getNested(state, onVal[1])
+      const params = onEl.dataset.param ? onEl.dataset.param.split(",").map(p => p.trim()) : []
+      
+      const listener = (e) => {
+        const path = getNested(state, handlerPath)
+        
         if(typeof path === "function") {
-          path()
+          eventModifier(modifier, e)
+          const param = resolveParams(params, state)
+          
+          path(...param, e)
         }
       }
       
@@ -148,5 +218,17 @@ export function mount() {
       modelEl.addEventListener("input", listener)
       eventMap["input"] = listener
     })
+    
+    //lifecycle
+    const onInit = el.querySelector("[data-init]") || el
+    const initVal = onInit.dataset.init
+    if(initVal) {
+      const path = getNested(state, initVal)
+      if(typeof path === "function") {
+        path()
+      }
+    }
+    
+    
   })
 }

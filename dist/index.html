@@ -9,15 +9,35 @@
   </head>
   <body>
     
-    <div data-scope="counter">
+    <div data-scope="counter" data-init="init">
       <input type="text" data-model="todo">
       <button data-on="click:add">Add todo</button>
       
       <div data-for="todos" data-key="$item">
         <template>
-          <p data-text="$item"></p>
+          <p>
+            <span data-text="$item"></span>
+            <button data-on="click:remove" data-param="$index">Remove</button>
+          </p>
         </template>
       </div>
+      
+      <div style="margin-top: 20px">
+        <button data-on="click:setActive" data-param="one">One</button>
+        <button data-on="click:setActive" data-param="two">One</button>
+        <button data-on="click:setActive" data-param="three">One</button>
+      </div>
+      
+      <div data-if="satu">
+        <h1>This is page one</h1>
+      </div>
+      <div data-if="dua">
+        <h1>This is page two</h1>
+      </div>
+      <div data-if="tiga">
+        <h1>This is page three</h1>
+      </div>
+      
     </div>
     
     <script src="cdn.min.js"></script>

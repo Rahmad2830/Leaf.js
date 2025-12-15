@@ -1,6 +1,11 @@
 defineScope("counter", () => {
-  const [todos, setTodos] = signal(["andei"])
+  const [todos, setTodos] = signal([])
   const [todo, setTodo] = signal("")
+  const [show, setShow] = signal("one")
+  
+  function init() {
+    console.log("hello")
+  }
   
   function add() {
     if(todo() === "") {
@@ -15,11 +20,13 @@ defineScope("counter", () => {
     setTodos(todos().filter((_, i) => i !== id))
   }
   
-  return {
-    remove,
-    todos,
-    todo,
-    setTodo,
-    add
+  function setActive(name) {
+    setShow(name)
   }
+  
+  const satu = () => show() === "one"
+  const dua = () => show() === "two"
+  const tiga = () => show() === "three"
+  
+  return { remove, todos, todo, setTodo, add, show, setActive, satu, dua, tiga }
 })
