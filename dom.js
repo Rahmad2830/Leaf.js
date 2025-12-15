@@ -75,9 +75,11 @@ function mountLoop(el, scope) {
       const params = onEl.dataset.param ? onEl.dataset.param.split(",").map(p => p.trim()) : []
       
       const listener = (e) => {
+        eventModifier(modifier, e)
+        if(!handlerPath) return
         const path = getNested(scope, handlerPath)
+        
         if(typeof path === "function") {
-          eventModifier(modifier, e)
           const param = resolveParams(params, scope)
           path(...param, e)
         }
@@ -120,10 +122,11 @@ export function mount() {
       const params = onEl.dataset.param ? onEl.dataset.param.split(",").map(p => p.trim()) : []
       
       const listener = (e) => {
+        eventModifier(modifier, e)
+        if(!handlerPath) return
         const path = getNested(state, handlerPath)
         
         if(typeof path === "function") {
-          eventModifier(modifier, e)
           const param = resolveParams(params, state)
           
           path(...param, e)

@@ -28,5 +28,5 @@ defineScope("counter", () => {
   const dua = () => show() === "two"
   const tiga = () => show() === "three"
   
-  return { remove, todos, todo, setTodo, add, show, setActive, satu, dua, tiga }
+  return { remove, todos, todo, setTodo, add, show, setActive, satu, dua, tiga, init }
 })
