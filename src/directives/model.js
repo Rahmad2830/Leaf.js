@@ -1,6 +1,6 @@
 import { effect } from "../reactivity.js"
 import { getNested, capitalize } from "../utils.js"
-import { setListener } from "./listener.js"
+import { setListener, clearListener } from "./listener.js"
 
 //read
 function renderModel(el, value) {
@@ -51,10 +51,15 @@ export function mountModel(el, scope) {
   
   el.querySelectorAll("[data-model]").forEach(modelEl => {
     const path = modelEl.dataset.model
+    if(!path) return
     const read = getNested(scope, path)
     const write = getNested(scope, "set" + capitalize(path))
     
-    if(typeof read !== "function" || typeof write !== "function") return
+    if(typeof read !== "function" || typeof write !== "function") {
+      throw new Error(
+      `[model] "${path}" requires signal "${path}()" and setter "set${capitalize(path)}()"`
+      )
+    }
     
     const modelDispose = effect(() => {
       renderModel(modelEl, read())
@@ -66,7 +71,11 @@ export function mountModel(el, scope) {
     
     setListener(modelEl, "input", listener)
     setListener(modelEl, "change", listener)
-    disposers.push(modelDispose)
+    disposers.push(() => {
+      modelDispose()
+      clearListener(modelEl, "input")
+      clearListener(modelEl, "change")
+    })
   })
   
   return () => disposers.forEach(fn => fn())

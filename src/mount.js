@@ -22,7 +22,9 @@ const cleanupMap = new WeakMap()
 export function mount() {
   document.querySelectorAll("[data-scope]").forEach(el => {
     const state = LocalScope[el.dataset.scope]
-    if(!state) return
+    if(!state) {
+      throw new Error(`Scope ${el.dataset.scope} is not defined`)
+    }
     
     const prevCleanup = cleanupMap.get(el)
     if(prevCleanup) {
@@ -32,9 +34,13 @@ export function mount() {
     const cleanups = []
     
     directives.forEach(mountFn => {
-      const cleanup = mountFn(el, state)
-      if(typeof cleanup === "function") {
-        cleanups.push(cleanup)
+      try {
+        const cleanup = mountFn(el, state)
+        if(typeof cleanup === "function") {
+          cleanups.push(cleanup)
+        }
+      } catch (err) {
+        console.error(`[Directive error] ${mountFn.name}`, err, el)
       }
     })
     

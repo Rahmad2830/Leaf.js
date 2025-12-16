@@ -6,6 +6,7 @@ export function mountText(el, scope) {
   
   el.querySelectorAll("[data-text]").forEach(textEl => {
     const path = textEl.dataset.text
+    if(!path) return
     
     const textDispose = effect(() => {
       const val = getNested(scope, path)

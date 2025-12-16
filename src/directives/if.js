@@ -6,6 +6,7 @@ export function mountIf(el, scope) {
   
   el.querySelectorAll("[data-if]").forEach(ifEl => {
     const ifVal = ifEl.dataset.if
+    if(!ifVal) return
     
     const ifDispose = effect(() => {
       const path = getNested(scope, ifVal)

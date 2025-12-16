@@ -7,10 +7,10 @@ function mountLoop(el, scope) {
   const disposers = []
   
   const textDispose = mountText(el, scope)
+  if(textDispose) disposers.push(textDispose)
   
-  disposers.push(textDispose)
-  
-  mountOn(el, scope)
+  const onDispose = mountOn(el, scope)
+  if(onDispose) disposers.push(onDispose)
   
   return () => disposers.forEach(fn => fn())
 }
@@ -20,7 +20,9 @@ export function mountFor(el, scope) {
   
   el.querySelectorAll("[data-for]").forEach(forEl => {
     const template = forEl.querySelector("template")
+    if(!template) return
     const forVal = forEl.dataset.for
+    if(!forVal) return
     
     let itemCleanups = []
     
@@ -39,17 +41,27 @@ export function mountFor(el, scope) {
       
       list.forEach((item, index) => {
         const clone = template.content.cloneNode(true)
+        const nodes = Array.from(clone.children)
+        
         const loopScope = {
           ...scope,
           $item: item,
           $index: index
         }
-        const dispose = mountLoop(clone, loopScope)
-        itemCleanups.push(dispose)
+          
+        nodes.forEach(node => {
+          const dispose = mountLoop(node, loopScope)
+          itemCleanups.push(dispose)
+        })
         forEl.appendChild(clone)
+        
       })
     })
-    disposers.push(forDisposer)
+    disposers.push(() => {
+      forDisposer()
+      itemCleanups.forEach(fn => fn())
+      itemCleanups = []
+    })
   })
   
   return () => disposers.forEach(fn => fn())
