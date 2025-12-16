@@ -20,12 +20,13 @@ export function mountFor(el, scope) {
   
   el.querySelectorAll("[data-for]").forEach(forEl => {
     const template = forEl.querySelector("template")
-    const path = forEl.dataset.for
+    const forVal = forEl.dataset.for
     
     let itemCleanups = []
     
-    const forDispose = effect(() => {
-      const list = getNested(scope, path)()
+    const forDisposer = effect(() => {
+      const path = getNested(scope, forVal)
+      const list = typeof path === "function" ? path() : path || []
       
       itemCleanups.forEach(fn => fn())
       itemCleanups = []
@@ -48,7 +49,7 @@ export function mountFor(el, scope) {
         forEl.appendChild(clone)
       })
     })
-    disposers.push(forDispose)
+    disposers.push(forDisposer)
   })
   
   return () => disposers.forEach(fn => fn())

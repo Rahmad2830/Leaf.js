@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
+    <title>home</title>
+  </head>
+  <body>
+    <label for="check">Check</label>
+    <input type="checkbox" value="makan" class="check">
+    <input type="checkbox" value="tidur" class="check">
+    
+    <script>
+      const v = document.querySelectorAll(".check")
+      v.forEach(cb => console.log(cb.value))
+      
+    </script>
+  </body>
+</html>

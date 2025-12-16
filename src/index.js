@@ -10,5 +10,5 @@ if (typeof window !== 'undefined') {
   window.signal = signal
   window.defineScope = defineScope
   window.mount = mount
-  window.mount = unmount
+  window.unmount = unmount
 }

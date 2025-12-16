@@ -9,7 +9,8 @@ export function mountIf(el, scope) {
     
     const ifDispose = effect(() => {
       const path = getNested(scope, ifVal)
-      if(path()) {
+      const read = typeof path === "function" ? path() : path
+      if(read) {
         ifEl.style.display = ""
       } else {
         ifEl.style.display = "none"
