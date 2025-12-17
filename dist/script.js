@@ -35,3 +35,13 @@ Leaf.defineScope("counter", () => {
   
   return { remove, todos, todo, setTodo, add, show, setActive, satu, dua, tiga, init, toggle, open }
 })
+
+Leaf.defineScope("navbar", () => {
+  const [open, setOpen] = Leaf.signal(false)
+  
+  function toggle() {
+    setOpen(!open())
+  }
+  
+  return { open, toggle }
+})
