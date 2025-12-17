@@ -6,6 +6,7 @@ import { mountFor } from "./directives/for.js"
 import { mountModel } from "./directives/model.js"
 import { mountInit } from "./directives/init.js"
 import { mountBind } from "./directives/bind.js"
+import { mountShow } from "./directives/show.js"
 
 const directives = [
   mountText,
@@ -14,7 +15,8 @@ const directives = [
   mountFor,
   mountModel,
   mountInit,
-  mountBind
+  mountBind,
+  mountShow
 ]
 
 const cleanupMap = new WeakMap()

@@ -8,13 +8,20 @@ export function mountIf(el, scope) {
     const ifVal = ifEl.dataset.if
     if(!ifVal) return
     
+    const parent = ifEl.parentNode
+    const nextSibling = ifEl.nextSibling
+    
     const ifDispose = effect(() => {
       const path = getNested(scope, ifVal)
       const read = typeof path === "function" ? path() : path
       if(read) {
-        ifEl.style.display = ""
+        if(!ifEl.isConnected) {
+          parent.insertBefore(ifEl, nextSibling)
+        }
       } else {
-        ifEl.style.display = "none"
+        if(ifEl.isConnected) {
+          parent.removeChild(ifEl)
+        }
       }
     })
     

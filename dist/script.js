@@ -2,9 +2,14 @@ Leaf.defineScope("counter", () => {
   const [todos, setTodos] = Leaf.signal([])
   const [todo, setTodo] = Leaf.signal("")
   const [show, setShow] = Leaf.signal("one")
+  const [open, setOpen] = Leaf.signal(false)
   
   function init() {
     console.log("hello")
+  }
+  
+  function toggle() {
+    setOpen(!open())
   }
   
   function add() {
@@ -28,5 +33,5 @@ Leaf.defineScope("counter", () => {
   const dua = () => show() === "two"
   const tiga = () => show() === "three"
   
-  return { remove, todos, todo, setTodo, add, show, setActive, satu, dua, tiga, init }
+  return { remove, todos, todo, setTodo, add, show, setActive, satu, dua, tiga, init, toggle, open }
 })

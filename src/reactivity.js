@@ -1,4 +1,4 @@
-let activeEffect = null
+let effectStack = []
 
 function cleanup(effectFn) {
   if(effectFn.deps) {
@@ -12,9 +12,9 @@ function cleanup(effectFn) {
 export function effect(fn) {
   const effectFn = () => {
     cleanup(effectFn)
-    activeEffect = effectFn
+    effectStack.push(effectFn)
     fn()
-    activeEffect = null
+    effectStack.pop()
   }
   
   effectFn.deps = new Set()
@@ -28,6 +28,7 @@ export function signal(initial) {
   const subs = new Set()
   
   const read = () => {
+    const activeEffect = effectStack[effectStack.length - 1]
     if (activeEffect) {
       subs.add(activeEffect)
       activeEffect.deps.add(subs)
@@ -45,22 +46,24 @@ export function signal(initial) {
 
 export function computed(fn) {
   let cached
+  let dirty = true
   const deps = new Set()
   
-  const compDispose = effect(() => {
-    //clear prev effect
-    deps.forEach(depEff => depEff.deps.delete(compDispose))
-    deps.clear()
-    
+  const runner = effect(() => {
     cached = fn()
-    deps.forEach(eff => eff())
+    dirty = false
   })
   
   return {
     get value() {
+      const activeEffect = effectStack[effectStack.length - 1]
       if(activeEffect) {
         deps.add(activeEffect)
         activeEffect.deps.add(deps)
+      }
+      
+      if(dirty) {
+        runner()
       }
       return cached
     }
