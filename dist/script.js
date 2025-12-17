@@ -1,7 +1,7 @@
-defineScope("counter", () => {
-  const [todos, setTodos] = signal([])
-  const [todo, setTodo] = signal("")
-  const [show, setShow] = signal("one")
+Leaf.defineScope("counter", () => {
+  const [todos, setTodos] = Leaf.signal([])
+  const [todo, setTodo] = Leaf.signal("")
+  const [show, setShow] = Leaf.signal("one")
   
   function init() {
     console.log("hello")

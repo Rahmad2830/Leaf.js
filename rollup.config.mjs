@@ -6,7 +6,8 @@ export default {
 	input: 'src/index.js',
 	output: {
 		file: 'dist/cdn.min.js',
-		format: 'iife'
+		format: 'iife',
+		name: 'Leaf'
 	},
 	plugins: [resolve(), minify()]
 };

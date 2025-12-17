@@ -1,14 +1,17 @@
-import { signal, effect } from './reactivity.js'
-import { defineScope } from './scope.js'
+import { signal, computed, effect } from './reactivity.js'
+import { defineScope, defineStore } from './scope.js'
 import { mount, unmount } from './mount.js'
+
+export {
+  signal,
+  computed,
+  effect,
+  defineScope,
+  defineStore,
+  mount,
+  unmount
+}
 
 if (typeof document !== 'undefined') {
   document.addEventListener("DOMContentLoaded", mount)
-}
-
-if (typeof window !== 'undefined') {
-  window.signal = signal
-  window.defineScope = defineScope
-  window.mount = mount
-  window.unmount = unmount
 }

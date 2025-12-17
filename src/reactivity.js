@@ -35,9 +35,34 @@ export function signal(initial) {
     return value
   }
   const write = (v) => {
+    if(Object.is(value, v)) return
     value = v
     const effect = new Set(subs)
     effect.forEach(fn => fn())
   }
   return [read, write]
+}
+
+export function computed(fn) {
+  let cached
+  const deps = new Set()
+  
+  const compDispose = effect(() => {
+    //clear prev effect
+    deps.forEach(depEff => depEff.deps.delete(compDispose))
+    deps.clear()
+    
+    cached = fn()
+    deps.forEach(eff => eff())
+  })
+  
+  return {
+    get value() {
+      if(activeEffect) {
+        deps.add(activeEffect)
+        activeEffect.deps.add(deps)
+      }
+      return cached
+    }
+  }
 }
