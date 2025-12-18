@@ -43,29 +43,3 @@ export function signal(initial) {
   }
   return [read, write]
 }
-
-export function computed(fn) {
-  let cached
-  let dirty = true
-  const deps = new Set()
-  
-  const runner = effect(() => {
-    cached = fn()
-    dirty = false
-  })
-  
-  return {
-    get value() {
-      const activeEffect = effectStack[effectStack.length - 1]
-      if(activeEffect) {
-        deps.add(activeEffect)
-        activeEffect.deps.add(deps)
-      }
-      
-      if(dirty) {
-        runner()
-      }
-      return cached
-    }
-  }
-}
