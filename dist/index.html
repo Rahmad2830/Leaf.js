@@ -6,6 +6,14 @@
     <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script>
     <title>Homepage</title>
+    <style>
+      .blue {
+        background-color: blue;
+      }
+      .green {
+        background-color: green;
+      }
+    </style>
   </head>
   <body>
     
@@ -32,14 +40,14 @@
       
       <div style="margin-top: 20px">
         <button data-on="click:setActive" data-param="one">One</button>
-        <button data-on="click:setActive" data-param="two">One</button>
-        <button data-on="click:setActive" data-param="three">One</button>
+        <button data-on="click:setActive" data-param="two">two</button>
+        <button data-on="click:setActive" data-param="three">three</button>
       </div>
       
-      <div data-if="satu">
+      <div data-show="satu" data-class="satu:green">
         <h1>This is page one</h1>
       </div>
-      <div data-if="dua">
+      <div data-show="dua" data-class="dua:blue">
         <h1>This is page two</h1>
       </div>
       <div data-if="tiga">

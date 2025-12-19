@@ -2,6 +2,8 @@ import { effect } from "../reactivity.js"
 import { getNested } from "../utils.js"
 import { mountText } from "./text.js"
 import { mountOn } from "./on.js"
+import { mountShow } from "./show.js"
+import { mountBind } from "./bind.js"
 
 function mountLoop(el, scope) {
   const disposers = []
@@ -11,6 +13,12 @@ function mountLoop(el, scope) {
   
   const onDispose = mountOn(el, scope)
   if(onDispose) disposers.push(onDispose)
+  
+  const showDispose = mountShow(el, scope)
+  if(showDispose) disposers.push(showDispose)
+  
+  const mountDispose = mountBind(el, scope)
+  if(mountDispose) disposers.push(mountDispose)
   
   return () => disposers.forEach(fn => fn())
 }
