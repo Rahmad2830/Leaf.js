@@ -15,11 +15,15 @@ export function mountClass(el, scope) {
       } else if(clsPath.length === 0) {
         throw new Error(`[class] a class is required for adding class`);
       }
-      const cls = clsPath.join(":")
+      const raw = clsPath.join(":").trim()
+      const cls = raw.replace(/^['"]|['"]$/g, "")
       const classDispose = effect(() => {
         const path = getNested(scope, fn.trim())
         if(typeof path === "function") {
-          classEl.classList.toggle(cls, path())
+          cls.split(/\s+/).forEach(c => {
+            if (!c) return
+            classEl.classList.toggle(c, path())
+          })
         } else {
           throw new Error(`[class] ${fn} must be a function`)
         }

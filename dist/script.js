@@ -8,8 +8,14 @@ Leaf.defineScope("counter", ({ $stores }) => {
   console.log($stores.yahaha.name())
   const [todos, setTodos] = Leaf.signal([])
   const [todo, setTodo] = Leaf.signal("")
+  const [name, setName] = Leaf.signal("")
   const [show, setShow] = Leaf.signal("two")
   const [open, setOpen] = Leaf.signal(false)
+  const route = window.location.pathname
+  
+  const haha = () => route === "/leaf/dist/index.html"
+  
+  console.log(haha())
   
   function init() {
     console.log("hello")
@@ -40,5 +46,5 @@ Leaf.defineScope("counter", ({ $stores }) => {
   const dua = () => show() === "two"
   const tiga = () => show() === "three"
   
-  return { remove, todos, todo, setTodo, add, show, setActive, satu, dua, tiga, init, toggle, open}
+  return { remove, todos, todo, setTodo, add, show, setActive, satu, dua, tiga, init, toggle, open, haha, name, setName}
 })
