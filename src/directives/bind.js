@@ -1,35 +1,35 @@
 import { effect } from "../reactivity.js"
-import { getNested } from "../utils.js"
+import { getNested } from "../utils/helpers.js"
 
 export function mountBind(el, state) {
-  const disposers = []
+  const bindVal = el.dataset.bind
+  if(!bindVal || !bindVal.includes(":")) return
   
-  el.querySelectorAll("[data-bind]").forEach(bindEl => {
-    const bindVal = bindEl.dataset.bind
-    if(!bindVal || !bindVal.includes(":")) return
+  const [attr, path] = bindVal.split(":").map(p => p.trim())
+  
+  const read = getNested(state, path)
+  if(typeof read !== "function") {
+    throw new Error(`[bind] ${path} is not a signal`);
+  }
+  
+  const bindDispose = effect(() => {
+    const val = read()
     
-    const [attr, path] = bindEl.dataset.bind.split(":").map(p => p.trim())
-    
-    const read = getNested(state, path)
-    if(typeof read !== "function") {
-      throw new Error(`[bind] ${path} is not a signal`);
+    if(val === null || val === undefined) {
+      el.removeAttribute(attr)
+    } else if(val === true) {
+      el.setAttribute(attr, "")
+    } else if(val === false) {
+      el.removeAttribute(attr)
+    } else {
+      el.setAttribute(attr, val)
     }
-    
-    const bindDispose = effect(() => {
-      const val = read()
-      
-      if(val === null || val === undefined) {
-        bindEl.removeAttribute(attr)
-      } else if(val === true) {
-        bindEl.setAttribute(attr, "")
-      } else if(val === false) {
-        bindEl.removeAttribute(attr)
-      } else {
-        bindEl.setAttribute(attr, val)
-      }
-    })
-    disposers.push(bindDispose)
   })
   
-  return () => disposers.forEach(fn => fn())
+  //legacy code
+  // el.querySelectorAll("[data-bind]").forEach(bindEl => {
+    
+  // })
+  
+  return bindDispose
 }

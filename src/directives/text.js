@@ -1,19 +1,26 @@
 import { effect } from "../reactivity.js"
-import { getNested } from "../utils.js"
+import { getNested } from "../utils/helpers.js"
 
 export function mountText(el, scope) {
-  const disposers = []
+  const path = el.dataset.text
+  if(!path) return
   
-  el.querySelectorAll("[data-text]").forEach(textEl => {
-    const path = textEl.dataset.text
-    if(!path) return
-    
-    const textDispose = effect(() => {
-      const val = getNested(scope, path)
-      textEl.textContent = typeof val === "function" ? val() : val
-    })
-    disposers.push(textDispose)
+  const textDispose = effect(() => {
+    const val = getNested(scope, path)
+    el.textContent = typeof val === "function" ? val() : val
   })
   
-  return () => disposers.forEach(fn => fn())
+  //legacy code
+  // el.querySelectorAll("[data-text]").forEach(textEl => {
+  //   const path = textEl.dataset.text
+  //   if(!path) return
+    
+  //   const textDispose = effect(() => {
+  //     const val = getNested(scope, path)
+  //     textEl.textContent = typeof val === "function" ? val() : val
+  //   })
+  //   disposers.push(textDispose)
+  // })
+  
+  return textDispose
 }

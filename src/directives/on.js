@@ -1,38 +1,36 @@
-import { getNested } from "../utils.js"
-import { resolveParams, eventModifier } from "./helpers.js"
-import { setListener, clearListener } from "./listener.js"
+import { resolveParams, eventModifier, getNested } from "../utils/helpers.js"
+import { setListener, clearListener } from "../utils/listener.js"
 
 export function mountOn(el, scope) {
-  const disposers = []
+  const onVal = el.dataset.on
+  if(!onVal) return
   
-  el.querySelectorAll("[data-on]").forEach(onEl => {
-    const onVal = onEl.dataset.on
-    if(!onVal || !onVal.includes(":")) return
-    const [eventWithMod, handlerPath] = onVal.split(":").map(p => p.trim())
-    const parts = eventWithMod.split(".")
-    const event = parts[0]
-    const modifier = parts.slice(1)
+  const [eventWithMod, handlerPath] = onVal.split(":").map(p => p.trim())
+  const parts = eventWithMod.split(".")
+  const event = parts[0]
+  const modifier = parts.slice(1)
+  
+  const params = el.dataset.param ? el.dataset.param.split(",").map(p => p.trim()) : []
+  
+  const listener = (e) => {
+    eventModifier(modifier, e)
+    if(!handlerPath) return
+    const path = getNested(scope, handlerPath)
     
-    const params = onEl.dataset.param ? onEl.dataset.param.split(",").map(p => p.trim()) : []
-    
-    const listener = (e) => {
-      eventModifier(modifier, e)
-      if(!handlerPath) return
-      const path = getNested(scope, handlerPath)
-      
-      if(typeof path === "function") {
-        const param = resolveParams(params, scope)
-        path(...param, e)
-      } else {
-        throw new Error(`[Listener] ${handlerPath} must be a function`);
-      }
+    if(typeof path === "function") {
+      const param = resolveParams(params, scope)
+      path(...param, e)
+    } else {
+      console.error(`[Listener] ${handlerPath} must be a function`)
     }
-    
-    setListener(onEl, event, listener)
-    disposers.push(() => {
-      clearListener(onEl, event)
-    })
-  })
+  }
   
-  return () => disposers.forEach(fn => fn())
+  setListener(el, event, listener)
+  
+  //legacy code using querySelectorAll
+  // el.querySelectorAll("[data-on]").forEach(onEl => {
+    
+  // })
+  
+  return () => clearListener(el, event)
 }

@@ -1,18 +1,13 @@
-import { getNested } from "../utils.js"
+import { getNested } from "../utils/helpers.js"
 
 export function mountInit(el, scope) {
-  const onInit = el.querySelector("[data-init]") || el
-  const initVal = onInit.dataset.init
+  const initVal = el.dataset.init
   if(!initVal) return
   
-  if(initVal) {
-    const path = getNested(scope, initVal)
-    if(typeof path === "function") {
-      path()
-    } else {
-      throw new Error(`[init] ${initVal} must be a function`);
-    }
+  const path = getNested(scope, initVal)
+  if(typeof path === "function") {
+    path()
+  } else {
+    throw new Error(`[init] ${initVal} must be a function`);
   }
-  
-  return null
 }

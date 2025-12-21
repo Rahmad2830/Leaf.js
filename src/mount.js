@@ -1,25 +1,6 @@
 import { LocalScope } from "./scope.js"
-import { mountText } from "./directives/text.js"
-import { mountOn } from "./directives/on.js"
-import { mountIf } from "./directives/if.js"
-import { mountFor } from "./directives/for.js"
-import { mountModel } from "./directives/model.js"
-import { mountInit } from "./directives/init.js"
-import { mountBind } from "./directives/bind.js"
-import { mountShow } from "./directives/show.js"
-import { mountClass } from "./directives/class.js"
-
-const directives = [
-  mountText,
-  mountOn,
-  mountIf,
-  mountFor,
-  mountModel,
-  mountInit,
-  mountBind,
-  mountShow,
-  mountClass
-]
+import { walk } from "./utils/walker.js"
+import { handlers } from "./utils/directives.js"
 
 const cleanupMap = new WeakMap()
 
@@ -37,16 +18,22 @@ export function mount() {
     
     const cleanups = []
     
-    directives.forEach(mountFn => {
-      try {
-        const cleanup = mountFn(el, state)
-        if(typeof cleanup === "function") {
-          cleanups.push(cleanup)
-        }
-      } catch (err) {
-        console.error(`[Directive error] ${mountFn.name}`, err, el)
-      }
-    })
+    const cleanup = walk(el, state, handlers)
+    if(typeof cleanup === "function") {
+      cleanups.push(cleanup)
+    }
+    
+    // legacy code
+    // directives.forEach(mountFn => {
+    //   try {
+    //     const cleanup = mountFn(el, state)
+    //     if(typeof cleanup === "function") {
+    //       cleanups.push(cleanup)
+    //     }
+    //   } catch (err) {
+    //     console.error(`[Directive error] ${mountFn.name}`, err, el)
+    //   }
+    // })
     
     cleanupMap.set(el, cleanups)
   })

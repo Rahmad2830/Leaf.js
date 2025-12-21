@@ -1,6 +1,6 @@
 import { effect } from "../reactivity.js"
-import { getNested, capitalize } from "../utils.js"
-import { setListener, clearListener } from "./listener.js"
+import { getNested, capitalize } from "../utils/helpers.js"
+import { setListener, clearListener } from "../utils/listener.js"
 
 //read
 function renderModel(el, value) {
@@ -47,36 +47,36 @@ function getInputValue(el, model) {
 }
 
 export function mountModel(el, scope) {
-  const disposers = []
+  const path = el.dataset.model
+  if(!path) return
+  const read = getNested(scope, path)
+  const write = getNested(scope, "set" + capitalize(path))
   
-  el.querySelectorAll("[data-model]").forEach(modelEl => {
-    const path = modelEl.dataset.model
-    if(!path) return
-    const read = getNested(scope, path)
-    const write = getNested(scope, "set" + capitalize(path))
-    
-    if(typeof read !== "function" || typeof write !== "function") {
-      throw new Error(
-      `[model] "${path}" requires signal "${path}()" and setter "set${capitalize(path)}()"`
-      )
-    }
-    
-    const modelDispose = effect(() => {
-      renderModel(modelEl, read())
-    })
-    
-    const listener = (e) => {
-      write(getInputValue(modelEl, read))
-    }
-    
-    setListener(modelEl, "input", listener)
-    setListener(modelEl, "change", listener)
-    disposers.push(() => {
-      modelDispose()
-      clearListener(modelEl, "input")
-      clearListener(modelEl, "change")
-    })
+  if(typeof read !== "function" || typeof write !== "function") {
+    throw new Error(
+    `[model] "${path}" requires signal "${path}()" and setter "set${capitalize(path)}()"`
+    )
+  }
+  
+  const modelDispose = effect(() => {
+    renderModel(el, read())
   })
   
-  return () => disposers.forEach(fn => fn())
+  const listener = (e) => {
+    write(getInputValue(el, read))
+  }
+  
+  const isText = el.tagName === "TEXTAREA" || (el.tagName === "INPUT" && !["checkbox", "radio"].includes(el.type))
+  
+  setListener(el, isText ? "input" : "change", listener)
+  
+  //legacy code
+  // el.querySelectorAll("[data-model]").forEach(modelEl => {
+    
+  // })
+  
+  return () => {
+    modelDispose()
+    clearListener(el, isText ? "input" : "change")
+  }
 }

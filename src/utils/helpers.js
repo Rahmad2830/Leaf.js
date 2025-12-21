@@ -1,5 +1,21 @@
-import { getNested } from "../utils.js"
+//for search nested path
+export function getNested(obj, path) {
+  const parts = path.split(".")
+  let current = obj
+  
+  for(const part of parts) {
+    current = current[part]
+    if(current === undefined) return undefined
+  }
+  return current
+}
 
+//capitalize first word
+export function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
+//resolve param (used in data-param)
 export function resolveParams(param, scope) {
   function resolve(p) {
     if(p === "true") return true
@@ -24,6 +40,7 @@ export function resolveParams(param, scope) {
   return pm
 }
 
+//event modifier
 export function eventModifier(mod = [], e) {
   if(mod.includes("prevent")) {
     e.preventDefault()

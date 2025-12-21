@@ -1,76 +1,59 @@
 import { effect } from "../reactivity.js"
-import { getNested } from "../utils.js"
-import { mountText } from "./text.js"
-import { mountOn } from "./on.js"
-import { mountShow } from "./show.js"
-import { mountBind } from "./bind.js"
+import { getNested } from "../utils/helpers.js"
 
-function mountLoop(el, scope) {
+export function mountFor(el, scope, walk, handlers) {
   const disposers = []
   
-  const textDispose = mountText(el, scope)
-  if(textDispose) disposers.push(textDispose)
+  const template = el.querySelector("template")
+  if(!template) return
+  const forVal = el.dataset.for
+  if(!forVal) return
   
-  const onDispose = mountOn(el, scope)
-  if(onDispose) disposers.push(onDispose)
+  let itemCleanups = []
   
-  const showDispose = mountShow(el, scope)
-  if(showDispose) disposers.push(showDispose)
-  
-  const mountDispose = mountBind(el, scope)
-  if(mountDispose) disposers.push(mountDispose)
-  
-  return () => disposers.forEach(fn => fn())
-}
-
-export function mountFor(el, scope) {
-  const disposers = []
-  
-  el.querySelectorAll("[data-for]").forEach(forEl => {
-    const template = forEl.querySelector("template")
-    if(!template) return
-    const forVal = forEl.dataset.for
-    if(!forVal) return
+  const forDispose = effect(() => {
+    const path = getNested(scope, forVal)
+    const list = typeof path === "function" ? path() : path || []
     
-    let itemCleanups = []
+    itemCleanups.forEach(fn => fn())
+    itemCleanups = []
     
-    const forDisposer = effect(() => {
-      const path = getNested(scope, forVal)
-      const list = typeof path === "function" ? path() : path || []
-      
-      itemCleanups.forEach(fn => fn())
-      itemCleanups = []
-      
-      Array.from(forEl.childNodes).forEach(node => {
-        if(node !== template) {
-          node.remove()
-        }
-      })
-      
-      list.forEach((item, index) => {
-        const clone = template.content.cloneNode(true)
-        const nodes = Array.from(clone.children)
-        
-        const loopScope = {
-          ...scope,
-          $item: item,
-          $index: index
-        }
-          
-        nodes.forEach(node => {
-          const dispose = mountLoop(node, loopScope)
-          itemCleanups.push(dispose)
-        })
-        forEl.appendChild(clone)
-        
-      })
+    Array.from(el.childNodes).forEach(node => {
+      if(node !== template) {
+        node.remove()
+      }
     })
-    disposers.push(() => {
-      forDisposer()
-      itemCleanups.forEach(fn => fn())
-      itemCleanups = []
+    
+    list.forEach((item, index) => {
+      const clone = template.content.cloneNode(true)
+      const nodes = Array.from(clone.children)
+      
+      const loopScope = {
+        ...scope,
+        $item: item,
+        $index: index
+      }
+        
+      nodes.forEach(node => {
+        const dispose = walk(node, loopScope, handlers)
+        if(typeof dispose === "function") {
+          itemCleanups.push(dispose)
+        }
+      })
+      el.appendChild(clone)
+      
     })
   })
+  disposers.push(() => {
+    forDispose()
+    itemCleanups.forEach(fn => fn())
+    itemCleanups = []
+  })
+  
+  //legacy code
+  // el.querySelectorAll("[data-for]").forEach(forEl => {
+    
+  // })
   
   return () => disposers.forEach(fn => fn())
 }
