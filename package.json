@@ -1,15 +1,15 @@
 {
-  "name": "Leaf",
-  "version": "1.0.0",
+  "name": "Leaf.js",
+  "version": "v1.0.4",
   "description": "a minimal frontend library",
-  "main": "src/main.js",
+  "main": "src/index.js",
   "scripts": {
     "build": "rollup --config",
     "test": "vitest"
   },
   "keywords": [],
   "author": "Rahmat",
-  "license": "ISC",
+  "license": "MIT",
   "type": "module",
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^16.0.3",
