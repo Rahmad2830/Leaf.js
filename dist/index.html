@@ -22,11 +22,11 @@
       <input type="text" data-model="todo">
       <button data-on="click:add">Add todo</button>
       
-      <div data-for="todos">
+      <div data-for="todos" data-key="$item.id">
         <template>
           <p>
-            <span data-text="$item"></span>
-            <button data-on="click:remove" data-param="$index">Remove</button>
+            <span data-text="$item.text"></span>
+            <button data-on="click:remove" data-param="$item.id">Remove</button>
           </p>
         </template>
       </div>

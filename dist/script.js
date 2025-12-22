@@ -25,17 +25,18 @@ Leaf.defineScope("counter", ({ $stores }) => {
     setOpen(!open())
   }
   
+  let id = 0
   function add() {
     if(todo() === "") {
       alert("kosong")
       return
     }
-    setTodos([...todos(), todo()])
+    setTodos([...todos(), { id: id++, text: todo() }])
     setTodo("")
   }
   
   function remove(id) {
-    setTodos(todos().filter((_, i) => i !== id))
+    setTodos(todos().filter(item => item.id !== id))
   }
   
   function setActive(name) {
