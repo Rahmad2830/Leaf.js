@@ -3,8 +3,11 @@ import { getNested } from "../utils/helpers.js"
 
 
 export function mountFor(el, scope, walk, handlers) {
+  //for keyed loop
   const listDom = new Map()
+  //for non keyed loop
   const doms = []
+  //toggle warning when not use data-key attr
   let warningNoKey = false
   
   const template = el.querySelector("template")
@@ -25,6 +28,16 @@ export function mountFor(el, scope, walk, handlers) {
     
     const keyExpr = el.dataset.key
     
+    // /Concepts/
+    // *Keyed loop (data-key)*
+    //   - Items can be reordered
+    //   - The old DOM is moved, not recreated
+    //   - An insertBefore is required
+    // *Non-keyed loop*
+    //   - The item is assumed to remain at its index position
+    //   - There is no concept of reorder
+    //   - Simply update the data, without moving the DOM
+    
     if(keyExpr) {
       if (doms.length) {
         doms.forEach(d => {
@@ -37,6 +50,7 @@ export function mountFor(el, scope, walk, handlers) {
       let lastEl = anchor
       
       list.forEach((item, index) => {
+        //isolated scope
         const loopScope = {
           $item: item,
           $index: index,
@@ -94,6 +108,7 @@ export function mountFor(el, scope, walk, handlers) {
       warningNoKey = true
       
       list.forEach((item, index) => {
+        //isolated scope
         const stateLoop = {
           $item: item,
           $index: index,
