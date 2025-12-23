@@ -6,7 +6,10 @@ Leaf.defineStore("yahaha", () => {
 
 Leaf.defineScope("counter", ({ $stores }) => {
   console.log($stores.yahaha.name())
-  const [todos, setTodos] = Leaf.signal([])
+  const [todos, setTodos] = Leaf.signal([
+    { id: 1, fruit: "Apple" },
+    { id: 2, fruit: "Banana" }
+  ])
   const [todo, setTodo] = Leaf.signal("")
   const [name, setName] = Leaf.signal("")
   const [show, setShow] = Leaf.signal("two")
@@ -31,7 +34,7 @@ Leaf.defineScope("counter", ({ $stores }) => {
       alert("kosong")
       return
     }
-    setTodos([...todos(), { id: id++, text: todo() }])
+    setTodos([...todos(), { id: id++, fruit: todo() }])
     setTodo("")
   }
   

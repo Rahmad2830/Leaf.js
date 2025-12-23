@@ -34,9 +34,8 @@ export function mountFor(el, scope, walk, handlers) {
     //   - The old DOM is moved, not recreated
     //   - An insertBefore is required
     // *Non-keyed loop*
-    //   - The item is assumed to remain at its index position
-    //   - There is no concept of reorder
-    //   - Simply update the data, without moving the DOM
+    //   - All dom is recreated
+    //   - Its kinda heavy when render many element
     
     if(keyExpr) {
       if (doms.length) {
@@ -64,7 +63,7 @@ export function mountFor(el, scope, walk, handlers) {
         }
         
         if(newKeys.has(key)) {
-          console.warn(`Duplicate key detected: ${key}. Rendering behavior may be unpredictable.`)
+          throw new Error(`Duplicate key detected: ${key}. Rendering behavior may be unpredictable.`)
         }
         newKeys.add(key)
         
@@ -102,6 +101,13 @@ export function mountFor(el, scope, walk, handlers) {
         listDom.clear()
       }
       
+      //delete old dom
+      doms.forEach(d => {
+        d.el.remove()
+        d.cleanup && d.cleanup()
+      })
+      doms.length = 0
+      
       if(!warningNoKey) {
         console.warn(`[data-for="${forVal}"] does not have a data-key. Reuse DOM may be suboptimal.`)
       }
@@ -115,25 +121,15 @@ export function mountFor(el, scope, walk, handlers) {
           ...scope
         }
         
-        if(doms[index]) {
-          doms[index].scope.$item = item
-          doms[index].scope.$index = index
-        } else {
-          const clone = template.content.cloneNode(true)
-          const firstEl = clone.firstElementChild
-          
-          const cleanup = walk(firstEl, stateLoop, handlers)
-          
-          doms[index] = { el: firstEl, scope: stateLoop, cleanup }
-          parent.insertBefore(firstEl, anchor.nextSibling)
-        }
+        const clone = template.content.cloneNode(true)
+        const firstEl = clone.firstElementChild
+    
+        const cleanup = walk(firstEl, stateLoop, handlers)
+        parent.insertBefore(firstEl, anchor)
+    
+        doms.push({ el: firstEl, scope: stateLoop, cleanup })
       })
       
-      while(doms.length > list.length) {
-        const d = doms.pop()
-        d.el.remove()
-        d.cleanup && d.cleanup()
-      }
     }
   })
   

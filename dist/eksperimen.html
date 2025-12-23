@@ -3,9 +3,27 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
     <title>Home</title>
   </head>
   <body>
     
+    <div id="app"></div>
+    
+    <script>
+      const app = document.getElementById("app")
+      
+      const arr = ["Apple", "Banana"]
+      
+      arr.forEach((item, index) => {
+        const li = document.createElement("li")
+        
+        li.textContent = item
+        
+        app.appendChild(li)
+      })
+    </script>
   </body>
 </html>
