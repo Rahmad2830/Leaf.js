@@ -64,7 +64,7 @@ export function pick(obj, path) {
     const p = path[key]
     out[key] = () => {
       const value = signal()
-      return getNested(value, path)
+      return getNested(value, p)
     }
   }
   
