@@ -12,7 +12,7 @@ export function mountShow(el, scope) {
   if(!showVal) return
   
   const value = getNested(scope, showVal)
-    if(typeof value !== "function") throw new Error(`[show] ${showVal} must be a function`)
+  if(typeof value !== "function") throw new Error(`[show] ${showVal} must be a function`)
   
   const attrAnimate = el.hasAttribute("data-animate")
   const animate = el.dataset.animate || "opacity 0.5s ease, transform 0.5s ease"

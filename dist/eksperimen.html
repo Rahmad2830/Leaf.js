@@ -10,19 +10,18 @@
   </head>
   <body>
     
-    <div id="app"></div>
+    <div data-scope="app">
+      <p data-text="list"></p>
+    </div>
     
     <script>
-      const app = document.getElementById("app")
-      
-      const arr = ["Apple", "Banana"]
-      
-      arr.forEach((item, index) => {
-        const li = document.createElement("li")
+      Leaf.defineScope("app", () => {
+        const [list, setList] = Leaf.signal({
+          name: "Rahmat",
+          age: 24
+        })
         
-        li.textContent = item
-        
-        app.appendChild(li)
+        return { list }
       })
     </script>
   </body>

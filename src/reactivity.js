@@ -1,3 +1,5 @@
+import { getNested } from "./utils/helpers.js"
+
 let effectStack = []
 
 function cleanup(effectFn) {
@@ -42,4 +44,29 @@ export function signal(initial) {
     effect.forEach(fn => fn())
   }
   return [read, write]
+}
+
+//signal object value helper
+//Im thinking bout something that work with the object value and dont wanna use proxy
+//to keep the library small.
+export function produce(fn) {
+  return prev => {
+    const next = structuredClone(prev)
+    fn(next)
+    return next
+  }
+}
+
+export function pick(obj, path) {
+  const out = {}
+  
+  for(const key in path) {
+    const p = path[key]
+    out[key] = () => {
+      const value = signal()
+      return getNested(value, path)
+    }
+  }
+  
+  return out
 }
