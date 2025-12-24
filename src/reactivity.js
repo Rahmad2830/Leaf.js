@@ -57,7 +57,7 @@ export function produce(fn) {
   }
 }
 
-export function pick(obj, path) {
+export function pick(signal, path) {
   const out = {}
   
   for(const key in path) {
